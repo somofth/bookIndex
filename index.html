@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title> 문서객체 모델(DOM)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: row;
+            height: 100vh;
+            margin: 0;
+            background-color: rgb(224, 218, 218);
+            gap: 35px;
+        }
+        .flex-container{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 400px;
+            width: 500px;
+            background-color: white;
+            gap: -10px;
+            /* border: 1px solid black; */
+            border-radius: 50px;
+            box-shadow: 0 0 10px rgb(189, 189, 189);
+
+        }
+        .information-container{
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 5px;
+        }
+        h1{
+            margin: 10px;
+            padding: 5px 10px;
+            /* border: 1px solid black; */
+            border-radius: 50px;
+            font-size: 0.9rem;
+            background-color: rgb(118, 180, 205);
+            box-shadow: 0 0 10px rgb(189, 189, 189);
+            color: white;
+            
+        }
+        .select-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .select-container select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            border: none;
+            background-color: rgb(255, 208, 216);
+            padding: 5px 30px 5px 10px; /* 오른쪽 패딩을 넉넉히 줘야 화살표랑 안 겹쳐 */
+            border-radius: 10px;
+            font-size: 1rem;
+            color: #333;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+            margin-top: 3px;
+        }
+
+        .select-container::after {
+            content: '▼';
+            font-size: 0.8rem;
+            color: #333;
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+        .shelf{
+            background-color: rgb(223, 247, 255);
+            padding: 10px 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgb(189, 189, 189);
+            
+        }
+        .line{
+            background-color: rgb(175, 175, 175);
+            width: 500px;
+            height: 0.5px;
+        }
+        img{
+            transition: all 0.3s ease;
+        }
+        img:hover{
+            transform: scale(1.05);
+            cursor: pointer;
+        }
+        img:active{
+            transform: scale(0.9);
+        }
+        footer{
+            font-weight: 200;
+            font-size: 0.9rem;
+        }
+        #category {
+        appearance: none;        /* 기본 화살표 없애기 (크로스 브라우징 시 아래 줄들도 참고) */
+        -webkit-appearance: none;
+        -moz-appearance: none;
+
+        border: none;
+        background-color: rgb(255, 208, 216);
+        padding: 5px 10px;
+        border-radius: 10px;
+        font-size: 1rem;
+        color: #333;
+        cursor: pointer;
+        box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        margin-top: 3px; /* 원하는 만큼 조절 가능 */
+        }
+        @media screen and (max-width: 400px) {
+            body {
+                flex-direction: column;
+                /* background-color: #333; */
+                font-size: 0.8rem;
+            }
+            .flex-container{
+                width: 300px;
+            }
+            .line{
+                width: 300px;
+            }
+            img{
+                width: 100px
+            }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="flex-container">
+        <h1>책 얼마나 읽었는지 알려주는 사이트</h1>
+        <img src="book.png" alt="책 아이콘" id="bookimage">
+        <div class="information-container">
+            <h2 id="bookname">책 제목</h2>
+            <h2 for="category">/ </h2>
+            <div class="select-container">
+                <select id="category">
+                    <option value="사회">사회</option>
+                    <option value="과학">과학</option>
+                    <option value="역사">역사</option>
+                    <option value="심리">심리</option>
+                    <option value="인문학">인문학</option>
+                    <option value="문학">문학</option>
+                    <option value="경제">경제</option>
+                </select>
+            </div>
+        </div>
+        <div class="line"></div>
+        <h3 id="bookindex">이만큼 읽었어요</h3>
+        
+        <!-- <button id="bookbutton" style="margin-top: -10px;">데이터 투입</button> -->
+    </div>
+    <div class="shelf">
+        <h3>지금까지 읽은 책</h3>
+        <ul class="book_list"></ul>
+        <footer>2025.04.첫 html+css+javascript</footer>
+    </div>
+
+    <script type= "text/javascript">
+    let bookname = document.getElementById('bookname');
+    let bookbutton = document.getElementById('bookbutton');
+    let bookimage = document.getElementById('bookimage');
+    function calculateIndex() {
+        bookname.textContent = '<'+prompt('책 제목은 무엇인가요?')+'>';
+        var pages = Number(prompt('전체 페이지는 몇 장인가요?'));
+        var frontpage = Number(prompt('지금은 몇 페이지를 읽고 있나요?'));
+        let percentage = (frontpage / pages) * 100;
+        bookindex.textContent = `읽은 페이지 비율: ${percentage.toFixed(2)}%`;
+        let book_list = document.getElementsByClassName('book_list')[0];
+        let listItem = document.createElement('li');
+        // listItem.textContent = `${bookname.textContent} - 읽은 비율: ${percentage.toFixed(2)}%`;
+        let category = document.getElementById('category').value;
+        listItem.textContent = `${bookname.textContent} (${category}) - 읽은 비율: ${percentage.toFixed(2)}%`;
+        book_list.appendChild(listItem);
+    }
+    function updateCategoryColor() {
+        const categoryValue = category.value;
+
+        let backgroundColor = '';
+        switch (categoryValue) {
+            case '사회':
+                backgroundColor = '#ffc9c5';  // 연한 핑크
+                break;
+            case '과학':
+                backgroundColor = '#c5efff';  // 연한 파랑
+                break;
+            case '역사':
+                backgroundColor = '#fffbd6';  // 연한 노랑
+                break;
+            case '심리':
+                backgroundColor = '#d6ffe2';  // 연한 민트
+                break;
+            case '인문학':
+                backgroundColor = '#ffb6c1';  // 핑크
+                break;
+            case '문학':
+                backgroundColor = '#c5efff';  // 보라
+                break;
+            case '경제':
+                backgroundColor = '#d6ffe2';  // 연한 노랑
+                break;
+            default:
+                backgroundColor = '#f5efed';  // 기본 베이지
+            }
+            category.style.backgroundColor = backgroundColor;
+        }   
+         // 페이지 로드 시 최초 색상 적용
+    updateCategoryColor();
+
+        // 카테고리 값 변경 시 색상 업데이트
+    category.addEventListener('change', updateCategoryColor); 
+
+    
+    // bookbutton.addEventListener('click',calculateIndex);
+    bookimage.addEventListener('click',calculateIndex);
+
+    </script>
+</body>
+</html>
